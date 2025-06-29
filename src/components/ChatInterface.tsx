@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Bot, Loader2, LogOut, Phone, MessageSquare, Settings, Trash2, Download, Shield, Zap, Star, Plus, History, Menu, X, Copy, ThumbsUp, ThumbsDown, RotateCcw, Lock, Key, Clock, MessageCircle } from 'lucide-react';
+import { Send, User, Bot, Loader2, LogOut, Phone, MessageSquare, Settings, Trash2, Download, Shield, Zap, Star, Plus, History, Menu, X, Copy, ThumbsUp, ThumbsDown, RotateCcw, Lock, Key, Clock, MessageCircle, Edit3, Check, MoreHorizontal } from 'lucide-react';
 import { ChatMessage, ChatSession, UserDatabase } from '../services/userDatabase';
 import { GeminiService } from '../services/geminiApi';
 import { TalkoAI } from '../services/talkoAI';
@@ -15,7 +15,10 @@ const ChatInterface: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const { user, logout } = useAuth();
   const { actualTheme } = useTheme();
 
@@ -33,6 +36,14 @@ const ChatInterface: React.FC = () => {
     }
   }, [user]);
 
+  // Auto-resize textarea
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + 'px';
+    }
+  }, [inputMessage]);
+
   const loadUserChatData = () => {
     if (!user) return;
     
@@ -44,7 +55,7 @@ const ChatInterface: React.FC = () => {
     
     if (!activeSession && chatData.sessions.length === 0) {
       // Create first session with welcome message
-      activeSession = UserDatabase.createNewChatSession(user.id, 'Welcome Chat');
+      activeSession = UserDatabase.createNewChatSession(user.id, 'Welcome to Talko AI');
       const welcomeMessage: ChatMessage = {
         id: 'welcome_' + Date.now(),
         content: TalkoAI.getIntroductionMessage(),
@@ -73,16 +84,7 @@ const ChatInterface: React.FC = () => {
   const createNewChat = () => {
     if (!user) return;
     
-    const newSession = UserDatabase.createNewChatSession(user.id);
-    const welcomeMessage: ChatMessage = {
-      id: 'welcome_' + Date.now(),
-      content: TalkoAI.getIntroductionMessage(),
-      sender: 'assistant',
-      timestamp: new Date()
-    };
-    
-    UserDatabase.saveChatMessage(user.id, welcomeMessage, newSession.id);
-    newSession.messages = [welcomeMessage];
+    const newSession = UserDatabase.createNewChatSession(user.id, 'New Chat');
     
     setCurrentSession(newSession);
     loadUserChatData(); // Refresh the sessions list
@@ -116,6 +118,26 @@ const ChatInterface: React.FC = () => {
         createNewChat();
       }
     }
+  };
+
+  const startEditingTitle = (session: ChatSession, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingSessionId(session.id);
+    setEditingTitle(session.title);
+  };
+
+  const saveTitle = () => {
+    if (!user || !editingSessionId) return;
+    
+    UserDatabase.updateSessionTitle(user.id, editingSessionId, editingTitle);
+    loadUserChatData();
+    setEditingSessionId(null);
+    setEditingTitle('');
+  };
+
+  const cancelEditing = () => {
+    setEditingSessionId(null);
+    setEditingTitle('');
   };
 
   const clearAllChats = () => {
@@ -251,6 +273,13 @@ const ChatInterface: React.FC = () => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+    }
+  };
+
   const formatTimestamp = (timestamp: Date) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -280,20 +309,19 @@ const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-80 chat-sidebar transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:inset-0`}>
+    <div className="flex h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+      {/* Sidebar - ChatGPT Style */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:inset-0`}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-            <div className="flex items-center justify-between">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Bot className="w-6 h-6 text-white" />
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-gray-800 dark:text-gray-200">Talko AI</h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Powered by SkillUp</p>
+                  <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200">Talko AI</h2>
                 </div>
               </div>
               <button
@@ -306,347 +334,328 @@ const ChatInterface: React.FC = () => {
             
             <button
               onClick={createNewChat}
-              className="w-full mt-4 btn-primary flex items-center justify-center space-x-2"
+              className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors font-medium"
             >
-              <Plus className="w-5 h-5" />
-              <span>New Chat</span>
+              <Plus className="w-4 h-4" />
+              <span>New chat</span>
             </button>
           </div>
 
           {/* Chat History */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">Chat History</h3>
-              {chatSessions.length > 0 && (
-                <button
-                  onClick={clearAllChats}
-                  className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium"
-                  title="Clear all chats"
-                >
-                  Clear All
-                </button>
-              )}
-            </div>
-            
-            <div className="space-y-2">
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="space-y-1">
               {chatSessions.map((session) => (
                 <div
                   key={session.id}
-                  className={`group relative p-3 rounded-xl cursor-pointer transition-all duration-200 ${
+                  className={`group relative flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 ${
                     currentSession?.id === session.id
-                      ? 'bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-700'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-transparent'
+                      ? 'bg-gray-200 dark:bg-gray-700'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                   onClick={() => switchToChat(session)}
                 >
-                  <div className="flex items-start space-x-3">
-                    <MessageCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-1" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{session.title}</p>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {session.messages.length} messages
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {getRelativeTime(session.updatedAt)}
+                  <MessageCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mr-3" />
+                  
+                  {editingSessionId === session.id ? (
+                    <div className="flex-1 flex items-center space-x-2">
+                      <input
+                        type="text"
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        className="flex-1 px-2 py-1 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-900 dark:text-gray-100"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveTitle();
+                          if (e.key === 'Escape') cancelEditing();
+                        }}
+                        autoFocus
+                      />
+                      <button
+                        onClick={saveTitle}
+                        className="p-1 text-green-600 hover:text-green-700"
+                      >
+                        <Check className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="p-1 text-gray-500 hover:text-gray-600"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
+                          {session.title}
                         </p>
                       </div>
-                    </div>
-                    <button
-                      onClick={(e) => deleteChat(session.id, e)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all duration-200"
-                      title="Delete chat"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                      
+                      <div className="opacity-0 group-hover:opacity-100 flex items-center space-x-1 transition-opacity">
+                        <button
+                          onClick={(e) => startEditingTitle(session, e)}
+                          className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded"
+                          title="Edit title"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={(e) => deleteChat(session.id, e)}
+                          className="p-1 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 rounded"
+                          title="Delete chat"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
               
               {chatSessions.length === 0 && (
                 <div className="text-center py-8">
-                  <MessageCircle className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">No chat history yet</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Start a new conversation!</p>
+                  <MessageCircle className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No conversations yet</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* User Profile Section */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-3 mb-3">
-              {user?.avatar && (
-                <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-600 shadow-lg" />
-              )}
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-white" />
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">{user?.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Secure Account</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{user?.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Free Plan</p>
+              </div>
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => setShowPasswordModal(true)}
+                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  title="Settings"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={logout}
+                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <button
-                onClick={() => setShowPasswordModal(true)}
-                className="flex items-center justify-center space-x-2 p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors text-sm font-medium"
-              >
-                <Key className="w-4 h-4" />
-                <span>Password</span>
-              </button>
-              <button
-                onClick={exportChat}
-                className="flex items-center justify-center space-x-2 p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors text-sm font-medium"
-              >
-                <Download className="w-4 h-4" />
-                <span>Export</span>
-              </button>
-            </div>
-
-            <div className="flex space-x-2 mb-3">
+            <div className="flex space-x-2">
               <button
                 onClick={handleCall}
-                className="flex-1 p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                className="flex-1 p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors text-center"
                 title="Call Support"
               >
                 <Phone className="w-4 h-4 mx-auto" />
               </button>
               <button
                 onClick={handleWhatsApp}
-                className="flex-1 p-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                className="flex-1 p-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors text-center"
                 title="WhatsApp"
               >
                 <MessageSquare className="w-4 h-4 mx-auto" />
               </button>
               <button
-                onClick={logout}
-                className="flex-1 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                title="Logout"
+                onClick={exportChat}
+                className="flex-1 p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors text-center"
+                title="Export Chat"
               >
-                <LogOut className="w-4 h-4 mx-auto" />
+                <Download className="w-4 h-4 mx-auto" />
               </button>
-            </div>
-            
-            <div className="flex items-center justify-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
-              <Shield className="w-3 h-3" />
-              <span>Secure & Private</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Chat Area */}
+      {/* Main Chat Area - ChatGPT Style */}
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Header */}
-        <header className="navbar shadow-lg">
-          <div className="container">
-            <div className="flex items-center justify-between py-4">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <Menu className="w-6 h-6" />
-                </button>
-                
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl animate-pulse-glow">
-                      <Bot className="w-7 h-7 text-white" />
-                    </div>
-                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-emerald-400 to-green-400 rounded-full flex items-center justify-center shadow-lg">
-                      <Star className="w-3 h-3 text-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-black text-gradient">
-                      {currentSession?.title || 'Talko AI'}
-                    </h1>
-                    <div className="flex items-center space-x-3">
-                      <p className="text-sm font-bold text-blue-600 dark:text-blue-400">Powered by SkillUp</p>
-                      <div className="flex items-center space-x-1">
-                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                        <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Online</span>
-                      </div>
-                    </div>
-                  </div>
+        <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    {currentSession?.title || 'Talko AI'}
+                  </h1>
                 </div>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <ThemeToggle />
-                <button
-                  onClick={exportChat}
-                  className="p-3 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  title="Export Current Chat"
-                >
-                  <Download className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={createNewChat}
-                  className="p-3 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  title="New Chat"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              <button
+                onClick={createNewChat}
+                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="New Chat"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </header>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 dark:bg-gray-900">
-          <div className="container max-w-4xl space-y-6">
+        {/* Messages Area - ChatGPT Style */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-4 py-6">
             {currentSession?.messages.map((message, index) => (
               <div
                 key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in group`}
-                style={{animationDelay: `${index * 0.1}s`}}
+                className={`group mb-6 ${
+                  message.sender === 'assistant' ? 'bg-gray-50 dark:bg-gray-800/50' : ''
+                }`}
               >
-                <div
-                  className={`flex max-w-[85%] ${
-                    message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
-                  } items-start space-x-3`}
-                >
-                  <div
-                    className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${
-                      message.sender === 'user'
-                        ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500'
-                        : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600'
-                    }`}
-                  >
-                    {message.sender === 'user' ? (
-                      <User className="w-5 h-5 text-white" />
-                    ) : (
-                      <Bot className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    )}
-                  </div>
-                  <div
-                    className={`px-6 py-4 rounded-2xl shadow-lg border ${
-                      message.sender === 'user'
-                        ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white ml-3 border-white/20'
-                        : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 mr-3'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`text-xs font-bold ${
-                        message.sender === 'user' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
+                <div className={`${message.sender === 'assistant' ? 'px-4 py-6' : 'px-4 py-4'}`}>
+                  <div className="max-w-3xl mx-auto">
+                    <div className="flex items-start space-x-4">
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                        message.sender === 'user'
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-500'
+                          : 'bg-green-600'
                       }`}>
-                        {message.sender === 'user' ? user?.name || 'You' : 'Talko AI'}
-                      </span>
-                      <span className={`text-xs ${
-                        message.sender === 'user' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {formatTimestamp(message.timestamp)}
-                      </span>
-                    </div>
-                    
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap font-medium">{message.content}</p>
-                    
-                    {message.sender === 'assistant' && (
-                      <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center space-x-2">
-                          <Shield className="w-3 h-3 text-emerald-500" />
-                          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Talko AI</span>
+                        {message.sender === 'user' ? (
+                          <User className="w-4 h-4 text-white" />
+                        ) : (
+                          <Bot className="w-4 h-4 text-white" />
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                            {message.sender === 'user' ? user?.name || 'You' : 'Talko AI'}
+                          </span>
                           {message.isUrdu && (
-                            <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-semibold">
+                            <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-medium">
                               اردو
                             </span>
                           )}
                         </div>
+                        
+                        <div className="prose prose-sm max-w-none dark:prose-invert">
+                          <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">
+                            {message.content}
+                          </p>
+                        </div>
+                        
+                        {/* Message Actions */}
+                        <div className="flex items-center space-x-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => copyMessage(message.content)}
+                            className="p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                            title="Copy message"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                          {message.sender === 'assistant' && (
+                            <>
+                              <button
+                                onClick={() => regenerateResponse(index)}
+                                className="p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                                title="Regenerate response"
+                              >
+                                <RotateCcw className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-gray-400 hover:text-green-600 dark:text-gray-500 dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                                title="Good response"
+                              >
+                                <ThumbsUp className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="p-1.5 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                                title="Bad response"
+                              >
+                                <ThumbsDown className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    )}
-                    
-                    {/* Message Actions */}
-                    <div className={`flex items-center space-x-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity ${
-                      message.sender === 'user' ? 'justify-start' : 'justify-end'
-                    }`}>
-                      <button
-                        onClick={() => copyMessage(message.content)}
-                        className={`p-1 rounded transition-colors ${
-                          message.sender === 'user' 
-                            ? 'text-blue-200 hover:text-white hover:bg-white/20' 
-                            : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                        title="Copy message"
-                      >
-                        <Copy className="w-3 h-3" />
-                      </button>
-                      {message.sender === 'assistant' && (
-                        <button
-                          onClick={() => regenerateResponse(index)}
-                          className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                          title="Regenerate response"
-                        >
-                          <RotateCcw className="w-3 h-3" />
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
               </div>
             ))}
+            
             {isLoading && (
-              <div className="flex justify-start animate-fade-in">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center shadow-lg">
-                    <Bot className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 px-6 py-4 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600">
-                    <div className="flex items-center space-x-3">
-                      <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
-                      <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Talko AI is thinking...</p>
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce typing-indicator"></div>
-                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce typing-indicator"></div>
-                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce typing-indicator"></div>
+              <div className="group mb-6 bg-gray-50 dark:bg-gray-800/50">
+                <div className="px-4 py-6">
+                  <div className="max-w-3xl mx-auto">
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-600 flex items-center justify-center">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Talko AI</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
+                          <span className="text-gray-500 dark:text-gray-400">Thinking...</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             )}
+            
             <div ref={messagesEndRef} />
           </div>
         </div>
 
-        {/* Input */}
-        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-6 shadow-lg">
-          <form onSubmit={handleSendMessage} className="container max-w-4xl">
-            <div className="flex space-x-4">
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Message Talko AI..."
-                  className="form-control pr-16 text-base py-4"
-                  disabled={isLoading}
-                />
-                <button
-                  type="submit"
-                  disabled={!inputMessage.trim() || isLoading}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-3 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white rounded-xl hover:from-blue-600 hover:via-purple-600 hover:to-indigo-600 focus:outline-none focus:ring-4 focus:ring-purple-200 dark:focus:ring-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+        {/* Input Area - ChatGPT Style */}
+        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <div className="max-w-3xl mx-auto px-4 py-4">
+            <form onSubmit={handleSendMessage} className="relative">
+              <div className="flex items-end space-x-3">
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={inputRef}
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Message Talko AI..."
+                    className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 resize-none min-h-[52px] max-h-[200px]"
+                    disabled={isLoading}
+                    rows={1}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!inputMessage.trim() || isLoading}
+                    className="absolute right-2 bottom-2 p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 dark:text-gray-300 rounded-lg transition-colors"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center justify-between mt-3">
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                🤖 Talko AI by SkillUp • Need help? Call +92 343 614 8715
+            </form>
+            
+            <div className="mt-2 text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Talko AI can make mistakes. Consider checking important information.
               </p>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Zap className="w-4 h-4 text-yellow-500" />
-                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Fast Response</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-emerald-500" />
-                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Secure</span>
-                </div>
-              </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
 
