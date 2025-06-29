@@ -19,20 +19,18 @@ const Hero: React.FC<HeroProps> = ({ onGetStarted }) => {
   };
 
   return (
-    <div className={`relative min-h-screen overflow-hidden transition-all duration-500 ${
-      actualTheme === 'dark' ? 'bootcamp-gradient-dark' : 'bootcamp-gradient'
-    }`}>
+    <div className="relative min-h-screen overflow-hidden bg-black transition-all duration-500">
       {/* Enhanced Animated Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-gradient-to-r from-blue-400/30 to-cyan-400/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute -bottom-8 left-40 w-96 h-96 bg-gradient-to-r from-indigo-400/30 to-purple-400/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
-        <div className="absolute top-1/2 right-10 w-72 h-72 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full mix-blend-multiply filter blur-2xl opacity-60 animate-float" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-20 right-1/3 w-80 h-80 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-float" style={{animationDelay: '3s'}}></div>
+        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-purple-600/30 to-pink-600/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-gradient-to-r from-blue-600/30 to-cyan-600/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute -bottom-8 left-40 w-96 h-96 bg-gradient-to-r from-indigo-600/30 to-purple-600/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
+        <div className="absolute top-1/2 right-10 w-72 h-72 bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-full mix-blend-multiply filter blur-2xl opacity-60 animate-float" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-20 right-1/3 w-80 h-80 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-float" style={{animationDelay: '3s'}}></div>
       </div>
 
       {/* Navigation */}
-      <nav className="navbar relative z-50">
+      <nav className="relative z-50 bg-black/80 backdrop-blur-xl border-b border-gray-800">
         <div className="container">
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center space-x-4">
@@ -45,13 +43,13 @@ const Hero: React.FC<HeroProps> = ({ onGetStarted }) => {
                 </div>
               </div>
               <div>
-                <h1 className="text-4xl font-black text-gradient">
+                <h1 className="text-4xl font-black bg-gradient-to-r from-white via-gray-100 to-gray-200 bg-clip-text text-transparent">
                   Talko AI
                 </h1>
                 <div className="flex items-center space-x-2">
-                  <p className="text-sm font-bold text-blue-200 dark:text-blue-300">Powered by SkillUp</p>
-                  <div className="w-1 h-1 bg-blue-200 dark:bg-blue-300 rounded-full"></div>
-                  <p className="text-sm font-bold text-emerald-200 dark:text-emerald-300">Enterprise AI</p>
+                  <p className="text-sm font-bold text-blue-300">Powered by SkillUp</p>
+                  <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+                  <p className="text-sm font-bold text-emerald-300">Enterprise AI</p>
                 </div>
               </div>
             </div>
@@ -95,52 +93,44 @@ const Hero: React.FC<HeroProps> = ({ onGetStarted }) => {
           <h1 className="text-6xl sm:text-8xl lg:text-9xl font-black text-white mb-8 leading-tight animate-fade-in">
             Meet
             <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-gradient"> Talko AI</span>
-            <span className="block text-4xl sm:text-5xl lg:text-6xl mt-4 text-emerald-300 dark:text-emerald-400">Your Intelligent Assistant</span>
+            <span className="block text-4xl sm:text-5xl lg:text-6xl mt-4 text-emerald-300">Your Intelligent Assistant</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-2xl sm:text-3xl text-white/90 mb-16 max-w-5xl mx-auto leading-relaxed animate-fade-in font-medium" style={{animationDelay: '0.2s'}}>
+          <p className="text-2xl sm:text-3xl text-gray-200 mb-16 max-w-5xl mx-auto leading-relaxed animate-fade-in font-medium" style={{animationDelay: '0.2s'}}>
             Experience the future of AI conversation with Talko AI - your advanced intelligent assistant powered by SkillUp. 
             Get smart responses, creative solutions, and engaging discussions with cutting-edge technology.
           </p>
 
           {/* Feature Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-20 animate-fade-in" style={{animationDelay: '0.4s'}}>
-            <div className="card glass-effect hover:scale-105 transition-transform duration-300 bootcamp-card">
-              <div className="card-body text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-                  <Zap className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-white font-black text-xl mb-3">Lightning Fast</h3>
-                <p className="text-white/80 text-sm leading-relaxed">Get instant intelligent responses with advanced AI processing and sub-second response times</p>
+            <div className="bg-gray-900/80 backdrop-blur-xl border border-gray-700 rounded-2xl p-6 hover:scale-105 transition-transform duration-300 shadow-2xl">
+              <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+                <Zap className="w-8 h-8 text-white" />
               </div>
+              <h3 className="text-white font-black text-xl mb-3">Lightning Fast</h3>
+              <p className="text-gray-300 text-sm leading-relaxed">Get instant intelligent responses with advanced AI processing and sub-second response times</p>
             </div>
-            <div className="card glass-effect hover:scale-105 transition-transform duration-300 bootcamp-card">
-              <div className="card-body text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-emerald-400 to-green-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-                  <Shield className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-white font-black text-xl mb-3">Secure & Private</h3>
-                <p className="text-white/80 text-sm leading-relaxed">Your conversations are protected with enterprise-grade security and complete privacy</p>
+            <div className="bg-gray-900/80 backdrop-blur-xl border border-gray-700 rounded-2xl p-6 hover:scale-105 transition-transform duration-300 shadow-2xl">
+              <div className="w-16 h-16 bg-gradient-to-r from-emerald-400 to-green-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+                <Shield className="w-8 h-8 text-white" />
               </div>
+              <h3 className="text-white font-black text-xl mb-3">Secure & Private</h3>
+              <p className="text-gray-300 text-sm leading-relaxed">Your conversations are protected with enterprise-grade security and complete privacy</p>
             </div>
-            <div className="card glass-effect hover:scale-105 transition-transform duration-300 bootcamp-card">
-              <div className="card-body text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-                  <Brain className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-white font-black text-xl mb-3">AI Powered</h3>
-                <p className="text-white/80 text-sm leading-relaxed">Advanced artificial intelligence for intelligent and contextual conversations</p>
+            <div className="bg-gray-900/80 backdrop-blur-xl border border-gray-700 rounded-2xl p-6 hover:scale-105 transition-transform duration-300 shadow-2xl">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+                <Brain className="w-8 h-8 text-white" />
               </div>
+              <h3 className="text-white font-black text-xl mb-3">AI Powered</h3>
+              <p className="text-gray-300 text-sm leading-relaxed">Advanced artificial intelligence for intelligent and contextual conversations</p>
             </div>
-            <div className="card glass-effect hover:scale-105 transition-transform duration-300 bootcamp-card">
-              <div className="card-body text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-                  <Globe className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-white font-black text-xl mb-3">Culturally Aware</h3>
-                <p className="text-white/80 text-sm leading-relaxed">Multilingual support with cultural sensitivity and respectful communication</p>
+            <div className="bg-gray-900/80 backdrop-blur-xl border border-gray-700 rounded-2xl p-6 hover:scale-105 transition-transform duration-300 shadow-2xl">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+                <Globe className="w-8 h-8 text-white" />
               </div>
+              <h3 className="text-white font-black text-xl mb-3">Culturally Aware</h3>
+              <p className="text-gray-300 text-sm leading-relaxed">Multilingual support with cultural sensitivity and respectful communication</p>
             </div>
           </div>
 
@@ -174,7 +164,7 @@ const Hero: React.FC<HeroProps> = ({ onGetStarted }) => {
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-12 text-white/80 text-lg animate-fade-in font-semibold" style={{animationDelay: '0.8s'}}>
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-12 text-gray-300 text-lg animate-fade-in font-semibold" style={{animationDelay: '0.8s'}}>
             <div className="flex items-center space-x-3">
               <Users className="w-6 h-6" />
               <span>100,000+ Happy Users</span>
@@ -194,7 +184,7 @@ const Hero: React.FC<HeroProps> = ({ onGetStarted }) => {
           </div>
 
           {/* Company Info Banner */}
-          <div className="mt-12 p-8 glass-modern rounded-3xl max-w-6xl mx-auto animate-fade-in shadow-2xl" style={{animationDelay: '1s'}}>
+          <div className="mt-12 p-8 bg-gray-900/80 backdrop-blur-xl border border-gray-700 rounded-3xl max-w-6xl mx-auto animate-fade-in shadow-2xl" style={{animationDelay: '1s'}}>
             <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-xl">
@@ -202,15 +192,15 @@ const Hero: React.FC<HeroProps> = ({ onGetStarted }) => {
                 </div>
                 <div className="text-left">
                   <h3 className="text-2xl font-black text-white">SkillUp</h3>
-                  <p className="text-lg font-bold text-blue-200 dark:text-blue-300">Leading AI Innovation Company</p>
-                  <p className="text-sm font-semibold text-purple-200 dark:text-purple-300">Advanced AI Solutions</p>
+                  <p className="text-lg font-bold text-blue-300">Leading AI Innovation Company</p>
+                  <p className="text-sm font-semibold text-purple-300">Advanced AI Solutions</p>
                 </div>
               </div>
               <div className="text-center sm:text-right">
-                <p className="text-white/90 text-lg font-medium mb-2">
+                <p className="text-gray-200 text-lg font-medium mb-2">
                   🚀 <strong>Contact:</strong> +92 343 614 8715
                 </p>
-                <p className="text-white/80 text-sm">
+                <p className="text-gray-300 text-sm">
                   Enterprise AI Solutions • No credit card required • Get started in seconds
                 </p>
               </div>
@@ -222,8 +212,8 @@ const Hero: React.FC<HeroProps> = ({ onGetStarted }) => {
       {/* Enhanced Bottom Wave */}
       <div className="absolute bottom-0 left-0 right-0">
         <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 120L1440 120L1440 0C1440 0 1140 80 720 80C300 80 0 0 0 0L0 120Z" fill="white" fillOpacity="0.1"/>
-          <path d="M0 120L1440 120L1440 20C1440 20 1140 100 720 100C300 100 0 20 0 20L0 120Z" fill="white" fillOpacity="0.05"/>
+          <path d="M0 120L1440 120L1440 0C1440 0 1140 80 720 80C300 80 0 0 0 0L0 120Z" fill="white" fillOpacity="0.05"/>
+          <path d="M0 120L1440 120L1440 20C1440 20 1140 100 720 100C300 100 0 20 0 20L0 120Z" fill="white" fillOpacity="0.02"/>
         </svg>
       </div>
     </div>
